@@ -1,0 +1,3 @@
+ads1115_address: 0x48
+bus_number: 1
+config_register: 0x01
