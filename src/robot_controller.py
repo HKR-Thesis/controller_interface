@@ -122,7 +122,7 @@ class RobotController:
         Returns:
             float: Reward value.
         """
-        angle, _, _, _ = self.state
+        angle, _, _, _, _ = self.state
         target_angle = np.pi
 
         angle_difference = np.abs(angle - target_angle)
