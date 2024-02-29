@@ -1,2 +1,3 @@
 smbus2
 Jetson.GPIO
+ADS1x15-ADC

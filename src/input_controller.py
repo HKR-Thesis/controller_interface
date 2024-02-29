@@ -1,75 +1,42 @@
-from smbus2 import SMBus
+from ADS1x15 import ADS1115
 
 class InputController:
     """
     This class represents an input interface for reading analog values from encoders
-    on an inverted pendulum system.
+    on an inverted pendulum system, using the ADS1115 ADC.
     """
 
-    def __init__(self, address, bus_number, config_reg) -> None:
+    def __init__(self, bus_number=1, address=0x48) -> None:
         """
-        Initializes an instance of the InputInterface class.
+        Initializes an instance of the InputController class.
 
         Parameters:
-        - address (int): The I2C address of the device.
-        - bus_number (int): The bus number to use for communication.
-        - config_reg (int): The configuration register address.
+        - bus_number (int): The I2C bus number to use for communication.
+        - address (int): The I2C address of the ADS1115 device.
+        """
+        self.ads = ADS1115(bus_number, address)
+        self.ads.setGain(self.ads.PGA_4_096V)
+        self.ads.setDataRate(self.ads.DR_ADS111X_860)
+
+    def read_analog_values(self):
+        """
+        Reads analog values from channels A0 and A1 on the ADS1115.
 
         Returns:
-        None
+        tuple: The analog values from A0 and A1, respectively.
         """
-        self.address = address
-        self.config_reg = config_reg
-        self.bus = SMBus(bus_number)
+        value_a0 = self.ads.readADC(0)
+        value_a1 = self.ads.readADC(1)
+        return value_a0, value_a1
 
-    def configure_continuous_mode(self, channel):
+    def read_voltages(self):
         """
-        Configures the input interface for continuous mode.
-
-        Parameters:
-        - channel (str): The channel to configure. Valid values are 'A0' and 'A1'.
+        Reads and converts analog values from channels A0 and A1 to voltages.
 
         Returns:
-        None
-
-        Raises:
-        - ValueError: If an invalid channel is provided.
+        tuple: The voltages from A0 and A1, respectively.
         """
-        if channel == 'A0':
-            config_data = [0xC4, 0x83]
-        elif channel == 'A1':
-            config_data = [0xD4, 0x83]
-        else:
-            raise ValueError("Invalid channel. Choose 'A0' or 'A1'.")
-        
-        self.bus.write_i2c_block_data(self.address, self.config_reg, config_data)
-
-    def read_conversion_result(self):
-        """
-        Reads the conversion result from the input interface.
-
-        Returns:
-        int: The conversion result.
-        """
-        data = self.bus.read_i2c_block_data(self.address, 0, 2)
-        return (data[0] << 8) | data[1]
-
-    def read_angle_continuous(self):
-        """
-        Reads the continuous angle from the input interface.
-
-        Returns:
-        int: The continuous angle value.
-        """
-        self.configure_continuous_mode('A1')
-        return self.read_conversion_result()
-
-    def read_position_continuous(self):
-        """
-        Reads the continuous position from the input interface.
-
-        Returns:
-        int: The continuous position value.
-        """
-        self.configure_continuous_mode('A0')
-        return self.read_conversion_result()
+        value_a0, value_a1 = self.read_analog_values()
+        voltage_a0 = self.ads.toVoltage(value_a0)
+        voltage_a1 = self.ads.toVoltage(value_a1)
+        return voltage_a0, voltage_a1

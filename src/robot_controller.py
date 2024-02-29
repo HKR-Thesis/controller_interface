@@ -14,7 +14,7 @@ class RobotController:
         __del__(self): Cleans up the GPIO resources when the object is deleted.
     """
 
-    def __init__(self, pin):
+    def __init__(self, pin=32):
         """
         Initializes the RobotController object with a specified pin.
 
@@ -29,7 +29,7 @@ class RobotController:
         self.pwm = GPIO.PWM(self.pin, 1000)
         self.pwm.start(0)
 
-    def move(self, direction=0):
+    def move(self, direction):
         """
         Moves the robot in the specified direction with a max duty cycle.
 
@@ -39,13 +39,12 @@ class RobotController:
         Raises:
             ValueError: If an invalid direction is provided.
         """
-        match direction:
-            case 0:
-                self.pwm.ChangeDutyCycle(0)
-            case 1:
-                self.pwm.ChangeDutyCycle(100)
-            case _:
-                raise ValueError(f"Invalid direction: {direction}")
+        if direction == "left":
+            self.pwm.ChangeDutyCycle(0)
+        elif direction == "right":
+            self.pwm.ChangeDutyCycle(100)
+        else:
+            raise ValueError(f"Invalid direction: {direction}")
 
     def __del__(self):
         """
