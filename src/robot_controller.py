@@ -14,7 +14,7 @@ class RobotController:
         __del__(self): Cleans up the GPIO resources when the object is deleted.
     """
 
-    def __init__(self, pin=32):
+    def __init__(self, pin=3):
         """
         Initializes the RobotController object with a specified pin.
 

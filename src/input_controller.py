@@ -25,6 +25,6 @@ class InputController:
         Returns:
         tuple: The analog values from A0 and A1 - angle and position, respectively.
         """
-        angle_value = self.ads.readADC(0)
-        position_value = self.ads.readADC(1)
-        return angle_value, position_value
+        position_value = self.ads.readADC(0)
+        angle_value = self.ads.readADC(1)
+        return position_value, angle_value
