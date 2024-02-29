@@ -18,25 +18,13 @@ class InputController:
         self.ads.setGain(self.ads.PGA_4_096V)
         self.ads.setDataRate(self.ads.DR_ADS111X_860)
 
-    def read_analog_values(self):
+    def read_angle_and_position(self):
         """
         Reads analog values from channels A0 and A1 on the ADS1115.
 
         Returns:
-        tuple: The analog values from A0 and A1, respectively.
+        tuple: The analog values from A0 and A1 - angle and position, respectively.
         """
-        value_a0 = self.ads.readADC(0)
-        value_a1 = self.ads.readADC(1)
-        return value_a0, value_a1
-
-    def read_voltages(self):
-        """
-        Reads and converts analog values from channels A0 and A1 to voltages.
-
-        Returns:
-        tuple: The voltages from A0 and A1, respectively.
-        """
-        value_a0, value_a1 = self.read_analog_values()
-        voltage_a0 = self.ads.toVoltage(value_a0)
-        voltage_a1 = self.ads.toVoltage(value_a1)
-        return voltage_a0, voltage_a1
+        angle_value = self.ads.readADC(0)
+        position_value = self.ads.readADC(1)
+        return angle_value, position_value

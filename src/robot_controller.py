@@ -39,9 +39,9 @@ class RobotController:
         Raises:
             ValueError: If an invalid direction is provided.
         """
-        if direction == "left":
+        if direction == 0:
             self.pwm.ChangeDutyCycle(0)
-        elif direction == "right":
+        elif direction == 1:
             self.pwm.ChangeDutyCycle(100)
         else:
             raise ValueError(f"Invalid direction: {direction}")
