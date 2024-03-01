@@ -1,5 +1,6 @@
 import Jetson.GPIO as GPIO, numpy as np
 from ADS1x15 import ADS1115
+import time
 
 class RobotController:
     """
@@ -17,9 +18,9 @@ class RobotController:
     Methods:
         __init__(self, pin): Initializes the RobotController object.
         setup_pwm(self): Initializes the PWM output.
-        setup_ads(self): Initializes the ADS1115.
+        setup_ads1115(self): Initializes the ADS1115.
         update_state(self): Updates the state of the robot.
-        read_analog(self): Reads analog values for position and angle.
+        read(self): Reads analog values for position and angle.
         calculate_reward(self): Calculates the reward based on current angle.
         move(self, direction): Moves the robot in the specified direction with max duty cycle.
         __del__(self): Cleans up the GPIO resources when the object is deleted.
@@ -35,16 +36,16 @@ class RobotController:
         if pin not in [33, 32]:
             raise ValueError("Invalid pin number. Only pin numbers 33 and 32 are accepted.")
 
-        self.setup_ads()
+        self.setup_ads1115()
         self.pin = pin
         self.angle_ratio = 9152.8
         self.position_ratio = 65534
-        self.loop_delay_left = 0.105
+        self.loop_delay_left = 0.135
         self.loop_delay_right = 0.008
 
         self.setup_pwm()
-        position, angle = self.read_analog()
-        self.state = np.array([angle, 0, position, 0])
+        position, angle = self.read()
+        self.state = np.array([angle, 0, position, 0, time.time()])
 
     def setup_pwm(self):
         GPIO.setmode(GPIO.BOARD)
@@ -52,7 +53,7 @@ class RobotController:
         self.pwm = GPIO.PWM(self.pin, 1000)
         self.pwm.start(0)
 
-    def setup_ads(self, bus_number=1, address=0x48):
+    def setup_ads1115(self, bus_number=1, address=0x48):
         """
         Initializes ADC converter with 4.096V gain and appropriate
         data rate.
@@ -65,7 +66,7 @@ class RobotController:
         """
         Updates the state of the robot.
         """
-        new_cart_position, new_angle = read_analog()
+        new_cart_position, new_angle = self.read()
         last_time = self.state[4]
         new_time = time.time()
         delta_time = new_time - last_time
@@ -81,14 +82,14 @@ class RobotController:
             new_time
         ])
 
-    def read_analog(self):
+    def read(self):
         """
         Reads analog values from channels A0 and A1 on the ADS1115.
 
         Returns:
             tuple: The normalized values from A0 and A1 - angle and position, respectively.
         """
-        position_value = self.ads.readADC(0) / self.position_ratio
+        position = self.ads.readADC(0) / self.position_ratio
         angle = self.ads.readADC(1) / self.angle_ratio
         return (position, angle)
 
