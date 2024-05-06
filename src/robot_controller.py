@@ -1,5 +1,7 @@
+import time
 import Jetson.GPIO as GPIO, numpy as np
 from ADS1x15 import ADS1115
+
 
 class RobotController:
     """
@@ -33,7 +35,9 @@ class RobotController:
             pin (int): The pin number for controlling the robot.
         """
         if pin not in [33, 32]:
-            raise ValueError("Invalid pin number. Only pin numbers 33 and 32 are accepted.")
+            raise ValueError(
+                "Invalid pin number. Only pin numbers 33 and 32 are accepted."
+            )
 
         self.setup_ads()
         self.pin = pin
@@ -65,7 +69,7 @@ class RobotController:
         """
         Updates the state of the robot.
         """
-        new_cart_position, new_angle = read_analog()
+        new_cart_position, new_angle = self.read_analog()
         last_time = self.state[4]
         new_time = time.time()
         delta_time = new_time - last_time
@@ -73,13 +77,15 @@ class RobotController:
         new_angular_velocity = (new_angle - self.state[0]) / delta_time
         new_cart_velocity = (new_cart_position - self.state[2]) / delta_time
 
-        self.state = np.array([
-            new_angle, 
-            new_angular_velocity, 
-            new_cart_position, 
-            new_cart_velocity, 
-            new_time
-        ])
+        self.state = np.array(
+            [
+                new_angle,
+                new_angular_velocity,
+                new_cart_position,
+                new_cart_velocity,
+                new_time,
+            ]
+        )
 
     def read_analog(self):
         """
@@ -90,7 +96,7 @@ class RobotController:
         """
         position_value = self.ads.readADC(0) / self.position_ratio
         angle = self.ads.readADC(1) / self.angle_ratio
-        return (position, angle)
+        return (position_value, angle)
 
     def move(self, direction):
         """
@@ -110,7 +116,6 @@ class RobotController:
             time.sleep(self.loop_delay_right)
         else:
             raise ValueError(f"Invalid direction: {direction}")
-        
 
     def calculate_reward(self):
         """
