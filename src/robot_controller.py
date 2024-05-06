@@ -96,7 +96,7 @@ class RobotController:
         """
         position = self.ads.readADC(0) / self.position_ratio
         angle = self.ads.readADC(1) / self.angle_ratio
-        return (position_value, angle)
+        return (position, angle)
 
     def move(self, direction):
         """
